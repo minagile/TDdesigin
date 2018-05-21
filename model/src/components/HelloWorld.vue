@@ -13,8 +13,8 @@
         <li><a href="#">海报设计</a></li>
         <li><a href="#">电商淘宝</a></li>
         <li><a href="#">企业办公</a></li>
-        <li><a v-show="isLogin">个人中心</a></li>
-        <li><a v-show="!isLogin" @click="isLoginShow = true">vip</a></li>
+        <!-- <li><a v-show="isLogin">个人中心</a></li> -->
+        <li><a @click="VIP">vip</a></li>
       </ul>
       <div class="banner"></div>
     </nav>
@@ -52,15 +52,17 @@
       </div>
     </div>
     <div class="user" id="id" v-if="isLoginShow" @click="close($event)">
-      <!-- <div id="id"> -->
       <Login @exit="exit"/>
-      <!-- </div> -->
+    </div>
+    <div class="user" id="id2" v-if="isVIPShow" @click="close($event)">
+      <Demo/>
     </div>
   </div>
 </template>
 
 <script>
 import Login from './Login'
+import Demo from './Demo'
 export default {
   name: 'HelloWorld',
   data () {
@@ -71,16 +73,27 @@ export default {
       showItem: 5,
       allpage: 13,
       isLoginShow: false,
-      isLogin: false
+      isLogin: false,
+      isVIPShow: false
     }
   },
   mounted () {
     this.getData()
   },
   methods: {
+    VIP () {
+      if (sessionStorage.getItem('userId')) {
+        this.isVIPShow = true
+      } else {
+        this.isLoginShow = true
+      }
+    },
     close (e) {
       if (e.target === document.getElementById('id')) {
         this.isLoginShow = false
+      }
+      if (e.target === document.getElementById('id2')) {
+        this.isVIPShow = false
       }
     },
     exit (data) {
@@ -144,7 +157,8 @@ export default {
     }
   },
   components: {
-    Login
+    Login,
+    Demo
   }
 }
 // function loadImage (url) {

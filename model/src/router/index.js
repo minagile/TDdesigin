@@ -19,12 +19,6 @@ export default new Router({
       name: 'HomePage',
       // component: HomePage
       component: resolve => require(['@/components/HomePage'], resolve)
-    },
-    {
-      path: '/page',
-      name: 'Page',
-      // component: Page
-      component: resolve => require(['@/components/Page'], resolve)
     }
   ]
 })
