@@ -1,15 +1,20 @@
 <template>
   <div class="hello">
+    <div class="login" v-show="!isLogin">
+      <a class="lo" @click="isLoginShow = true">请登录</a>
+      <a @click="isLoginShow = true">免费注册</a>
+    </div>
+    <div class="login" v-show="isLogin">
+      12321
+    </div>
     <nav>
       <ul>
         <li><a href="#">首页</a></li>
-        <li><a href="#">广告设计</a></li>
-        <li><a href="#">背景元素</a></li>
+        <li><a href="#">海报设计</a></li>
         <li><a href="#">电商淘宝</a></li>
-        <li><a href="#">多媒体</a></li>
         <li><a href="#">企业办公</a></li>
-        <li><a href="#">装饰装修</a></li>
-        <li><a href="#">插画配图</a></li>
+        <li><a v-show="isLogin">个人中心</a></li>
+        <li><a v-show="!isLogin" @click="isLoginShow = true">vip</a></li>
       </ul>
       <div class="banner"></div>
     </nav>
@@ -20,6 +25,8 @@
       <div class="figure" v-for="(item, index) in data" :key="index">
         <a @click="$router.push({name: 'HomePage', query: {id: item.tId}})">
           <img :src="item.image" />
+          <!-- <img v-lazy="item.image" /> -->
+          <!-- <img src="https://spider-x.oss-cn-shanghai.aliyuncs.com/Template/aaa.JPEG" alt=""> -->
         </a>
         <a class="cover" @click="link(item.tId)">
           <div class="cover_t">
@@ -44,10 +51,16 @@
         </ul>
       </div>
     </div>
+    <div class="user" id="id" v-if="isLoginShow" @click="close($event)">
+      <!-- <div id="id"> -->
+      <Login @exit="exit"/>
+      <!-- </div> -->
+    </div>
   </div>
 </template>
 
 <script>
+import Login from './Login'
 export default {
   name: 'HelloWorld',
   data () {
@@ -56,13 +69,25 @@ export default {
       pageCount: 1,
       current: 1,
       showItem: 5,
-      allpage: 13
+      allpage: 13,
+      isLoginShow: false,
+      isLogin: false
     }
   },
   mounted () {
     this.getData()
   },
   methods: {
+    close (e) {
+      if (e.target === document.getElementById('id')) {
+        this.isLoginShow = false
+      }
+    },
+    exit (data) {
+      console.log(data)
+      this.isLoginShow = data
+      this.isLogin = true
+    },
     link (id) {
       this.$router.push({name: 'HomePage', query: {id: id}})
       // window.open('#/homepage?id=' + id)
@@ -71,9 +96,13 @@ export default {
       if (index === this.current) return
       this.current = index
       // 这里可以发送ajax请求
+      this.data = []
       this.getData()
     },
     getData () {
+      if (sessionStorage.getItem('userId')) {
+        this.isLogin = true
+      }
       let that = this
       that.$http.get('https://www.temaxd.com/temPage', {
         params: {
@@ -82,9 +111,9 @@ export default {
       }).then(res => {
         // console.log(res.data.count)
         // console.log(res.data.data)
-        res.data.data.forEach(v => {
-          loadImage(v.image)
-        })
+        // res.data.data.forEach(v => {
+        //   loadImage(v.image)
+        // })
         this.data = res.data.data
       })
     }
@@ -113,21 +142,64 @@ export default {
       }
       return pag
     }
+  },
+  components: {
+    Login
   }
 }
-function loadImage (url) {
-  var img = new Image()
-  img.onload = function () {
-    img.onload = null
-  }
-  img.src = url
-}
+// function loadImage (url) {
+//   var img = new Image()
+//   img.onload = function () {
+//     img.onload = null
+//   }
+//   img.src = url
+// }
 </script>
 
 <style lang="less" scoped>
 .hello {
   width: 1200px;
   margin: 40px auto;
+  position: relative;
+}
+.user {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.419);
+}
+.login {
+  width: 100%;
+  text-align: right;
+  padding-bottom: 20px;
+  a {
+    color: #666;
+    padding: 0 10px;
+    height: 26px;
+    line-height: 26px;
+    &:hover {
+      color: #ff8a00;
+    }
+  }
+  .lo {
+    display: inline-block;
+    text-align: center;
+    width: 62px;
+    padding: 0;
+    height: 26px;
+    line-height: 26px;
+    text-indent: 3px;
+    color: #ff8a00;
+    border: 1px solid #ff8a00;
+    -webkit-border-radius: 12px;
+    border-radius: 12px;
+    &:hover {
+      background: #ff8a00;
+      color: #fff;
+    }
+  }
 }
 nav {
   position: relative;
@@ -194,13 +266,16 @@ nav {
   }
   .figure {
     float: left;
-    width: 285px;
+    width: 283px;
     height: 430px;
     border-radius: 10px;
-    margin: 0 20px 30px 0;
+    margin: 0 20px 30px 1px;
     box-shadow: 0 0 4px rgba(0, 0, 0, .15);
     overflow: hidden;
     position: relative;
+    &:hover {
+      // box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
+    }
     .cover {
       position: absolute;
       top: 0;
