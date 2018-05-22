@@ -1,7 +1,7 @@
 <template>
   <div class="lo">
     <div class="login" v-show="isLogin">
-      <input type="text" placeholder="手机号/用户名/UID/邮箱" v-model="user" />
+      <input type="text" placeholder="手机号/邮箱" v-model="user" />
       <input type="password" placeholder="请输入密码" v-model="password" />
       <div class="forget">
         <a @click="isRegister = true, isLogin = false, isForget = false" class="l">账号注册</a>
@@ -74,7 +74,7 @@ export default {
           // this.data = response.data.userId
           if (response.data.code === '200') {
             // alert('登录成功')
-            sessionStorage.setItem('userId', response.data.userId)
+            localStorage.setItem('userId', response.data.userId)
             this.$emit('exit', false)
           } else {
             alert(response.data.message)
@@ -152,8 +152,9 @@ export default {
             }, { emulateJSON: true }).then(response => {
               // console.log(response.data)
               if (response.data.code === '200') {
-                this.$router.push('/login')
+                // this.$router.push('/login')
                 localStorage.setItem('userId', response.data.userId)
+                this.$emit('exit', false)
               } else {
                 alert(response.data.message)
               }
@@ -179,7 +180,8 @@ export default {
             }, { emulateJSON: true }).then(response => {
               // console.log(response.data)
               if (response.data.code === '200') {
-                this.$router.push('/login')
+                // this.$router.push('/login')
+                this.$emit('exit', false)
                 localStorage.setItem('userId', response.data.userId)
               } else {
                 alert(response.data.message)
@@ -248,7 +250,7 @@ export default {
       } else if (this.codeF === '') {
         alert('验证码不为空')
       } else {
-        if (this.passwordF === this.confirmpasswordF) {
+        if (this.passwordF === this.confirmpassword) {
           if (this.codeF === this.confirmCodeF) {
             this.$http.post('https://www.temaxd.com/forgetUser', {
               account: this.number,
@@ -327,7 +329,7 @@ export default {
       color: #8d8d8d;
       cursor: pointer;
       &:hover {
-        color: #3895e8;
+        color: #39BEAB;
       }
     }
     .r {
@@ -349,7 +351,7 @@ export default {
     display: block;
     border-radius: 5px;
     cursor: pointer;
-    background-color: #42a5f5;
+    background-color: #39BEAB;
     border: 0;
   }
 }
@@ -366,7 +368,7 @@ export default {
       right: 0;
       top: 0;
       &:hover {
-        color: #3895e8;
+        color: #39BEAB;
       }
       &.forbidden:hover {
         color: #969696;
@@ -381,14 +383,14 @@ export default {
     margin: 0 auto 30px;
     text-align: center;
     a {
-      color: #42a5f5;
+      color: #39BEAB;
     }
   }
 }
 .forget {
   h4 {
     font-size: 18px;
-    color: #42a5f5;
+    color: #39BEAB;
     text-align: center;
     width: 400px;
     margin: 0 auto;
@@ -400,7 +402,7 @@ export default {
     font-size: 12px;
     color: #cacaca;
     a {
-      color: #42a5f5;
+      color: #39BEAB;
     }
   }
   .code {
@@ -415,7 +417,7 @@ export default {
       right: 0;
       top: 0;
       &:hover {
-        color: #3895e8;
+        color: #39BEAB;
       }
       &.forbidden:hover {
         color: #969696;

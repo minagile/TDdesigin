@@ -13,7 +13,9 @@ Vue.use(VueLazyLoad, {
     'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1526895226430&di=5a4b2b12fedb3ab409d65e7592db8c73&imgtype=0&src=http%3A%2F%2Fwww.dehong.gov.cn%2Fstatics%2Fimages%2Floading.gif'
 })
 Vue.config.productionTip = false
-
+router.afterEach((to, from, next) => {
+  window.scrollTo(0, 0)
+})
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

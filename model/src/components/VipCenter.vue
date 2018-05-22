@@ -4,7 +4,7 @@
 			<div class="logo">
 				<img src="../assets/logo.png" alt="">
 				<p>Temaxd会员</p>
-				<span><i style="color:red;font-style:normal;">15</i>元/月</span>
+				<span><i style="color:#39BEAB;font-style:normal;">15</i>元/月</span>
 			</div>
 			<ul class="info">
 				<li>免费使用免费</li>
@@ -21,13 +21,13 @@
 		</div>
 		<div class="right">
 			<div class="user">
-				<p><span>姓名昵称</span>(来自<i>邮箱</i>登录)</p>
+				<p><span>{{ Data.userName }}</span>(来自<i>{{ lo }}</i>登录)</p>
 			</div>
 			<div class="kinds">
-				<a :class="{'active': a}" @click="vip.num = '9', vip.time = '月', a = true, b = false, c = false, d = false">月度会员</a>
-				<a :class="{'active': b}" @click="vip.num = '10', vip.time = '季', a = false, b = true, c = false, d = false">季度会员</a>
-				<a :class="{'active': c}" @click="vip.num = '11', vip.time = '年', a = false, b = false, c = true, d = false">年度会员</a>
-				<a :class="{'active': d}" @click="vip.num = '12', vip.time = '次', a = false, b = false, c = false, d = true">次数会员</a>
+				<a :class="{'active': a}" @click="vip.num = '30', vip.time = '月', a = true, b = false, c = false, d = false">月度会员</a>
+				<a :class="{'active': b}" @click="vip.num = '100', vip.time = '季', a = false, b = true, c = false, d = false">季度会员</a>
+				<a :class="{'active': c}" @click="vip.num = '300', vip.time = '年', a = false, b = false, c = true, d = false">年度会员</a>
+				<!-- <a :class="{'active': d}" @click="vip.num = '12', vip.time = '次', a = false, b = false, c = false, d = true">次数会员</a> -->
 			</div>
 			<span>12345678987654321234567</span>
 			<div class="detail">
@@ -37,7 +37,8 @@
 				</div>
 			</div>
 			<div class="price">
-				<span>¥<i>89</i></span><b>(省<span>12</span>元)</b>
+				<span>¥<i>{{ vip.num }}</i></span>
+				<!-- <b>(省<span>12</span>元)</b> -->
 			</div>
 			<button @click="pay">立即支付</button>
 		</div>
@@ -57,7 +58,7 @@ export default {
   data () {
 		return {
 			vip: {
-				num: '9',
+				num: '30',
 				time: '月'
 			},
 			a: true,
@@ -65,10 +66,32 @@ export default {
 			c: false,
       d: false,
       isPay: false,
-      data: ''
+      data: '',
+			Data: {},
+			lo: ''
 		}
 	},
+	mounted () {
+		this.getInfo()
+	},
 	methods: {
+		getInfo () {
+      let that = this
+      that.$http.get('https://www.temaxd.com/getUserInfo', {
+        params: {
+          userId: localStorage.getItem('userId')
+        }
+      }).then(res => {
+        console.log(res.data)
+        // this.avatar = res.data.userAvatar
+        this.Data = res.data
+				if (this.Data.userEmail) {
+					this.lo = '邮箱' + this.Data.userEmail
+				} else {
+					this.lo = '手机号' + this.Data.userPhone
+				}
+      })
+    },
     yes () {
       let that = this
       that.$http.get('http://www.temaxd.com/getAliPayResult', {
@@ -76,21 +99,38 @@ export default {
           outTradeNo: this.data
         }
       }).then(res => {
-        // console.log(res.data.alipay_trade_query_response.sub_msg)
+        console.log(res.data.alipay_trade_query_response.out_trade_no)
         if (res.data.alipay_trade_query_response.sub_msg === '交易不存在') {
           alert('支付未成功')
         } else {
           this.isPay = false
+					that.$http.get('http://www.temaxd.com/upgradeMembership', {
+						params: {
+							levelName: this.vip.time + '会员',
+							userId: localStorage.getItem('userId')
+						}
+					}).then(res => {
+						console.log(res.data)
+						if (res.data.code === '200') {
+							this.getInfo()
+							this.$emit('closeClient', false)
+						}
+					})
         }
       })
     },
 		pay () {
       this.isPay = true
       let that = this
-      that.$http.get('http://www.temaxd.com/getOutNo').then(res => {
+      that.$http.get('http://www.temaxd.com/getOutNo', {
+				params: {
+					userId: localStorage.getItem('userId')
+				}
+			}).then(res => {
         // console.log(res.data)
         this.data = res.data
-        window.open('http://www.temaxd.com/aliPayHtml?money=0.01&mchName=VIP月度素材&mchNameText=会员&outTradeNo=' + this.data)
+        // window.open('http://www.temaxd.com/aliPayHtml?money=' + this.vip.num + '&mchName=VIP'+ this.vip.time +'素材&mchNameText=会员&outTradeNo=' + this.data)
+        window.open('http://www.temaxd.com/aliPayHtml?money=0.01' + '&mchName=VIP'+ this.vip.time +'素材&mchNameText=会员&outTradeNo=' + this.data)
       })
 		}
 	}
@@ -167,7 +207,7 @@ export default {
 			}
 			i {
 				font-style: normal;
-				color: red;
+				color: #39BEAB;
 			}
 		}
 	}
@@ -186,12 +226,12 @@ export default {
 			border: 1px solid #ccc;
 		}
 		.active {
-			border: 1px solid red;
-			color: red;
+			border: 1px solid #39BEAB;
+			color: #39BEAB;
 		}
 	}
 	span {
-		color: red;
+		color: #39BEAB;
 	}
 	.detail {
 		padding: 20px 0;
@@ -223,7 +263,7 @@ export default {
 	button {
 		width: 160px;
 		border: 0;
-		background: red;
+		background: #39BEAB;
 		color: #fff;
 		height: 40px;
 		font-size: 20px;

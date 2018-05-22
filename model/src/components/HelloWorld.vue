@@ -1,26 +1,23 @@
 <template>
   <div class="hello">
-    <div class="login" v-show="!isLogin">
-      <a class="lo" @click="isLoginShow = true">请登录</a>
-      <a @click="isLoginShow = true">免费注册</a>
-    </div>
-    <div class="login" v-show="isLogin">
-      12321
-    </div>
     <nav>
+      <img class="logo" src="../assets/logo1.png" alt="">
       <ul>
         <li><a href="#">首页</a></li>
         <li><a href="#">海报设计</a></li>
         <li><a href="#">电商淘宝</a></li>
         <li><a href="#">企业办公</a></li>
         <!-- <li><a v-show="isLogin">个人中心</a></li> -->
-        <li><a @click="VIP">vip</a></li>
+        <li><a @click="VIP">VIP</a></li>
       </ul>
+      <div class="head">
+        <HeadPage @loginShow="loginShow" :isLogin="isLogin" />
+      </div>
       <div class="banner"></div>
     </nav>
     <div class="body">
       <div class="head">
-        <p>排序方式：</p>
+        <!-- <p>排序方式：</p> -->
       </div>
       <div class="figure" v-for="(item, index) in data" :key="index">
         <a @click="$router.push({name: 'HomePage', query: {id: item.tId}})">
@@ -55,14 +52,15 @@
       <Login @exit="exit"/>
     </div>
     <div class="user" id="id2" v-if="isVIPShow" @click="close($event)">
-      <Demo/>
+      <Demo @closeClient="closeClient"/>
     </div>
   </div>
 </template>
 
 <script>
 import Login from './Login'
-import Demo from './Demo'
+import Demo from './VipCenter'
+import HeadPage from './HeadPage'
 export default {
   name: 'HelloWorld',
   data () {
@@ -74,15 +72,34 @@ export default {
       allpage: 13,
       isLoginShow: false,
       isLogin: false,
-      isVIPShow: false
+      isVIPShow: false,
+      avatar: ''
     }
   },
   mounted () {
     this.getData()
   },
   methods: {
+    loginShow (data) {
+      this.isLoginShow = data
+    },
+    closeClient (data) {
+      this.isVIPShow = data
+    },
+    getInfo () {
+      let that = this
+      that.$http.get('https://www.temaxd.com/getUserInfo', {
+        params: {
+          userId: localStorage.getItem('userId')
+        }
+      }).then(res => {
+        console.log(res.data)
+        // this.data = res.data
+        this.avatar = res.data.userAvatar
+      })
+    },
     VIP () {
-      if (sessionStorage.getItem('userId')) {
+      if (localStorage.getItem('userId')) {
         this.isVIPShow = true
       } else {
         this.isLoginShow = true
@@ -97,7 +114,8 @@ export default {
       }
     },
     exit (data) {
-      console.log(data)
+      // console.log(data)
+      this.getInfo()
       this.isLoginShow = data
       this.isLogin = true
     },
@@ -113,8 +131,11 @@ export default {
       this.getData()
     },
     getData () {
-      if (sessionStorage.getItem('userId')) {
+      if (localStorage.getItem('userId')) {
         this.isLogin = true
+        this.getInfo()
+      } else {
+        this.isLogin = false
       }
       let that = this
       that.$http.get('https://www.temaxd.com/temPage', {
@@ -122,11 +143,6 @@ export default {
           pageCount: this.current
         }
       }).then(res => {
-        // console.log(res.data.count)
-        // console.log(res.data.data)
-        // res.data.data.forEach(v => {
-        //   loadImage(v.image)
-        // })
         this.data = res.data.data
       })
     }
@@ -158,22 +174,16 @@ export default {
   },
   components: {
     Login,
-    Demo
+    Demo,
+    HeadPage
   }
 }
-// function loadImage (url) {
-//   var img = new Image()
-//   img.onload = function () {
-//     img.onload = null
-//   }
-//   img.src = url
-// }
 </script>
 
 <style lang="less" scoped>
 .hello {
-  width: 1200px;
-  margin: 40px auto;
+  width: 1600px;
+  margin: 140px auto;
   position: relative;
 }
 .user {
@@ -188,13 +198,52 @@ export default {
   width: 100%;
   text-align: right;
   padding-bottom: 20px;
+  overflow: hidden;
+  .img {
+    width: 100px;
+    float: right;
+    text-align: right;
+  }
+  img {
+    width: 40px;
+    height: 40px;
+    display: inline-block;
+    border-radius: 50%;
+    // float: right;
+    cursor: pointer;
+    box-sizing: border-box;
+    border: 1px solid #ccc;    
+    &:hover {
+      border: 1px solid #ccc;
+    }
+  }
+  .sign_out {
+    display: none;
+    width: 100px;
+    height: 30px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    position: absolute;
+    right: -20px;
+    top: 40px;
+    margin-top: 10px;
+    text-align: center;
+    line-height: 30px;
+    z-index: 100;
+    a {
+      background: #fff;
+      display: block;
+      line-height: 30px;      
+      cursor: pointer;
+    }
+  }
   a {
     color: #666;
     padding: 0 10px;
     height: 26px;
     line-height: 26px;
     &:hover {
-      color: #ff8a00;
+      color: #39BEAB;
     }
   }
   .lo {
@@ -205,12 +254,12 @@ export default {
     height: 26px;
     line-height: 26px;
     text-indent: 3px;
-    color: #ff8a00;
-    border: 1px solid #ff8a00;
+    color: #39BEAB;
+    border: 1px solid #39BEAB;
     -webkit-border-radius: 12px;
     border-radius: 12px;
     &:hover {
-      background: #ff8a00;
+      background: #39BEAB;
       color: #fff;
     }
   }
@@ -224,6 +273,18 @@ nav {
   box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
   min-height: 50px;
   padding-bottom: 20px;
+  .logo {
+    width: 180px;
+    position: absolute;
+    top: -100px;
+    left: 45%;
+  }
+  .head {
+    position: absolute;
+    // height: 80px;
+    top: -58px;
+    right: 0;
+  }
   ul {
     // overflow: hidden;
     width: 100%;
@@ -240,22 +301,26 @@ nav {
         color: #666;
         cursor: pointer;
         &:hover {
-          color: #ff8a00;
-          border-bottom: 2px solid #ff8a00;
+          color: #39BEAB;
+          border-bottom: 2px solid #39BEAB;
         }
       }
     }
   }
   .banner {
     // width: 100%;
-    height: 300px;
-    background: #00ffdd60;
-    margin: 20px;
+    height: 382px;
+    // background: #00ffdd60;
+    margin: 20px 40px;
     border-radius: 5px;
+    background-image: url(https://pic.ibaotu.com/banner/20180521/5b0228508f513.jpg!fqc1390);
+    background-size: cover;
+    background-position: center center;
   }
 }
 .body {
   width: 100%;
+  // padding: 0 10px;
   min-height: 100px;
   // background: #ff88006e;
   // margin-top: 30px;
@@ -265,10 +330,10 @@ nav {
   position: relative;
   .head {
     // width: 100%;
-    height: 40px;
+    // height: 40px;
     -webkit-border-radius: 4px;
     border-radius: 4px;
-    background-color: #fafafa;
+    background-color: #fff;
     line-height: 40px;
     padding-left: 60px;
     margin: 40px auto 25px;
@@ -280,17 +345,18 @@ nav {
   }
   .figure {
     float: left;
-    width: 283px;
-    height: 430px;
+    width: 340px;
+    height: 480px;
     border-radius: 10px;
-    margin: 0 20px 30px 1px;
+    margin: 0 30px 50px 30px;
     box-shadow: 0 0 4px rgba(0, 0, 0, .15);
     overflow: hidden;
     position: relative;
+    box-shadow: 1px 15px 20px rgba(0, 0, 0, 0.2);
     &:hover {
-      // box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
     }
     .cover {
+      // display: none;
       position: absolute;
       top: 0;
       left: 0;
@@ -300,7 +366,7 @@ nav {
       .cover_t {
         position: absolute;
         top: -100px;
-        transition: 1s;
+        transition: 0.3s;
         left: 0;
         width: 100%;
         height: 20%;
@@ -314,14 +380,14 @@ nav {
       .cover_b {
         position: absolute;
         bottom: -100px;
-        transition: 1s;
+        transition: 0.3s;
         left: 0;
         width: 100%;
         height: 20%;
         background: linear-gradient(to top, rgba(0, 0, 0, .4) 0, transparent 100%);
         button {
           border-radius: 30px;
-          background: linear-gradient(to right, #ffae12 0, #f07d17 100%);
+          background: linear-gradient(to right, rgb(65, 209, 187) 0, rgb(51, 170, 152) 100%);
           width: 70%;
           height: 60%;
           color: #fff;
@@ -330,16 +396,17 @@ nav {
           border-radius: 30px;
           box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
           cursor: pointer;
+          border: 0;
         }
       }
       &:hover {
         .cover_b {
           bottom: 0;
-          transition: 1s;
+          transition: 0.3s;
         }
         .cover_t {
           top: 0;
-          transition: 1s;
+          transition: 0.3s;
         }
       }
     }
@@ -375,7 +442,7 @@ nav {
           display: inline-block;
           border: 1px solid #ddd;
           background: #fff;
-          color: #0E90D2;
+          color: #39BEAB;
           &:hover {
             background: #eee;
           }
@@ -383,7 +450,7 @@ nav {
       }
     }
     .pagination li.active a {
-      background: #0E90D2;
+      background: #39BEAB;
       color: #fff;
     }
   }
